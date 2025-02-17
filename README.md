@@ -1,3 +1,11 @@
+Developers note:
+This project was done by me during a Typescript udemy certification. The inspiration for this project comes from 2 very popolar libraries that were used before React and Angular took over
+
+1. Marionette
+2. Backbone.js
+
+
+
 TypeScript Web
 
 A simple TypeScript web application project setup.
