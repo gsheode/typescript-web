@@ -2940,18 +2940,19 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"h7u1C":[function(require,module,exports,__globalThis) {
 var _user = require("./models/User");
-var _userForm = require("./views/UserForm");
+var _userEdit = require("./views/UserEdit");
 const user = (0, _user.User).buildUser({
     name: 'NAME',
     age: 20
 });
 const root = document.getElementById('root');
 if (root) {
-    const userForm = new (0, _userForm.UserForm)(root, user);
-    userForm.render();
+    const userEdit = new (0, _userEdit.UserEdit)(root, user);
+    userEdit.render();
+    console.log(userEdit);
 } else throw new Error('Root element not found');
 
-},{"./models/User":"4rcHn","./views/UserForm":"gXSLD"}],"4rcHn":[function(require,module,exports,__globalThis) {
+},{"./models/User":"4rcHn","./views/UserEdit":"3CihC"}],"4rcHn":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "User", ()=>User);
@@ -7917,7 +7918,107 @@ class Collection {
     }
 }
 
-},{"./Eventing":"7459s","axios":"jo6P5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gXSLD":[function(require,module,exports,__globalThis) {
+},{"./Eventing":"7459s","axios":"jo6P5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3CihC":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "UserEdit", ()=>UserEdit);
+var _view = require("./View");
+var _userForm = require("./UserForm");
+var _userShow = require("./UserShow");
+class UserEdit extends (0, _view.View) {
+    regionsMap() {
+        return {
+            userShow: '.user-show',
+            userForm: '.user-form'
+        };
+    }
+    onRender() {
+        new (0, _userShow.UserShow)(this.regions.userShow, this.model).render();
+        new (0, _userForm.UserForm)(this.regions.userForm, this.model).render();
+    }
+    template() {
+        return `
+            <div>
+                <div class="user-show"></div>
+                <div class="user-form"></div>
+            </div>
+        `;
+    }
+}
+
+},{"./View":"5Vo78","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./UserShow":"2Tlyi","./UserForm":"gXSLD"}],"5Vo78":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "View", ()=>View);
+class View {
+    constructor(parent, model){
+        this.parent = parent;
+        this.model = model;
+        this.regions = {};
+        this.bindModel();
+    }
+    regionsMap() {
+        return {};
+    }
+    // not abstract because abstract methods are required to be implmeneted by any classes that extend the View class
+    // this way of return {} ensure that it isnt a required field
+    eventMap() {
+        return {};
+    }
+    bindModel() {
+        this.model.on('change', ()=>{
+            this.render();
+        });
+    }
+    bindEvents(fragements) {
+        const eventMap = this.eventMap();
+        for(let eventKey in eventMap){
+            const [eventName, selector] = eventKey.split(':');
+            fragements.querySelectorAll(selector).forEach((element)=>{
+                // when the event click happens on an element eg: click: button
+                // perfom the fucntion eventMap[eventKey] i.e onButtonClick
+                element.addEventListener(eventName, eventMap[eventKey]);
+            });
+        }
+    }
+    mapRegions(fragement) {
+        const regionsMap = this.regionsMap();
+        for(let key in regionsMap){
+            const selector = regionsMap[key];
+            const element = fragement.querySelector(selector);
+            if (element) this.regions[key] = element;
+        }
+    }
+    onRender() {}
+    render() {
+        this.parent.innerHTML = '';
+        const templateElement = document.createElement('template');
+        templateElement.innerHTML = this.template();
+        this.bindEvents(templateElement.content);
+        this.mapRegions(templateElement.content);
+        this.onRender();
+        this.parent.append(templateElement.content);
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2Tlyi":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "UserShow", ()=>UserShow);
+var _view = require("./View");
+class UserShow extends (0, _view.View) {
+    template() {
+        return `
+        <div>
+            <h1>User Details</h1>
+            <div>User Name: ${this.model.get('name')}</div>
+            <div>User Name: ${this.model.get('age')}</div>
+        </div>
+        `;
+    }
+}
+
+},{"./View":"5Vo78","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gXSLD":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "UserForm", ()=>UserForm);
@@ -7956,41 +8057,6 @@ class UserForm extends (0, _view.View) {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./View":"5Vo78"}],"5Vo78":[function(require,module,exports,__globalThis) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "View", ()=>View);
-class View {
-    constructor(parent, model){
-        this.parent = parent;
-        this.model = model;
-        this.bindModel();
-    }
-    bindModel() {
-        this.model.on('change', ()=>{
-            this.render();
-        });
-    }
-    bindEvents(fragements) {
-        const eventMap = this.eventMap();
-        for(let eventKey in eventMap){
-            const [eventName, selector] = eventKey.split(':');
-            fragements.querySelectorAll(selector).forEach((element)=>{
-                // when the event click happens on an element eg: click: button
-                // perfom the fucntion eventMap[eventKey] i.e onButtonClick
-                element.addEventListener(eventName, eventMap[eventKey]);
-            });
-        }
-    }
-    render() {
-        this.parent.innerHTML = '';
-        const templateElement = document.createElement('template');
-        templateElement.innerHTML = this.template();
-        this.bindEvents(templateElement.content);
-        this.parent.append(templateElement.content);
-    }
-}
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["aQL8O","bTHtU","h7u1C"], "h7u1C", "parcelRequire94c2")
+},{"./View":"5Vo78","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["aQL8O","bTHtU","h7u1C"], "h7u1C", "parcelRequire94c2")
 
 //# sourceMappingURL=index.b71e74eb.js.map
